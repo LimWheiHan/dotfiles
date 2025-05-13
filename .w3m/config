@@ -1,0 +1,38 @@
+# Ref; https://vitalyparnas.com/guides/w3m/
+display_link 1
+default_url 0
+display_borders 1
+display_image 0
+mark_all_pages 1
+
+color 1
+basic_color terminal
+anchor_color green
+image_color cyan
+form_color blue
+mark_color yellow
+bg_color terminal
+
+# when searching jump back to top after last instance
+wrap_search 1 
+
+ignorecase_search 1
+
+# Ref: https://wiki.archlinux.org/title/W3m#Using_kittens_image_protocol
+# Displaying Image (There's an option for wezterm also)
+inline_img_protocol 4
+imgdisplay kitty
+
+
+
+
+# Custom Fingerprint
+user_agent Mozilla/5.0 (Windows NO 10.0; rev:91.0) Gecko/20100101 Firefox91.0
+no_referer 1
+cross_origin_referer 0
+accept_language en-US,en;q=0.5
+accept_encoding gzip, deflate
+accept_media text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+
+use_cookie 0
+no_cache 1
