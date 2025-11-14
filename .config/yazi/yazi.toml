@@ -1,0 +1,55 @@
+# [plugin]
+# prepend_previewers = [
+#   { name = "*.ipynb", run = "nbpreview" },
+# ]
+
+[mgr]
+ratio = [1, 2, 5]
+
+[plugin]
+
+prepend_previewers = [
+#    { url = "*.csv", run = "rich-preview"}, # for csv files
+    { url = "*.md", run = "rich-preview" }, # for markdown (.md) files
+#    { url = "*.rst", run = "rich-preview"}, # for restructured text (.rst) files
+#    { url = "*.ipynb", run = "rich-preview"}, # for jupyter notebooks (.ipynb)
+    { url = "*.ipynb", run = "nbpreview"}, # for jupyter notebooks (.ipynb)
+#    { url = "*.json", run = "rich-preview"}, # for json (.json) files
+#    { url = "*.lang_type", run = "rich-preview"} # for particular language files eg. .py, .go., .lua, etc.
+  { url = "*.csv", run = "duckdb" },  
+  { url = "*.tsv", run = "duckdb" },  
+  { url = "*.json", run = "duckdb" },  
+  { url = "*.parquet", run = "duckdb" },  
+  { url = "*.txt", run = "duckdb" },  
+  { url = "*.xlsx", run = "duckdb" },  
+  { url = "*.db", run = "duckdb" },
+  { url = "*.duckdb", run = "duckdb" }
+]
+
+prepend_preloaders = [  
+  { url = "*.csv", run = "duckdb", multi = false },  
+  { url = "*.tsv", run = "duckdb", multi = false },  
+  { url = "*.json", run = "duckdb", multi = false },  
+  { url = "*.parquet", run = "duckdb", multi = false },
+  { url = "*.txt", run = "duckdb", multi = false },  
+  { url = "*.xlsx", run = "duckdb", multi = false }
+]
+
+
+# [[plugin.prepend_previewers]]
+# name = "*.ipynb"
+# run  = 'piper -- nbpreview --no-paging --nerd-font --decorated --no-files --unicode --color --images --color-system=standard --theme=ansi_dark "$1"'
+
+# [[plugin.prepend_previewers]]
+# url = "*"
+# run = 'piper -- echo "$1"'
+
+
+# [[plugin.prepend_previewers]]
+# url = "*.tar*"
+# run = 'piper --format=url -- tar tf "$1"'
+
+
+# [[plugin.append_previewers]]
+# url = "*"
+# run = 'piper -- hexyl --border=none --terminal-width=$w "$1"'
