@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: use_package
+# key: use_package
+# --
+(use_package $0
+  :ensure t)

@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: iter_list_comprehension
+# key: iter_list_comprehension
+# --
+[i for i in $0]

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: dg_asset
+# key: dg_asset
+# --
+@dg.Asset
+def $0(context: dg.AssetExecutionContext):
+    pass

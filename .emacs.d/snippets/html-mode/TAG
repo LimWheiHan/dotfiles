@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: general_tag
+# key: general_tag
+# --
+<$1>
+  $0
+<$1>

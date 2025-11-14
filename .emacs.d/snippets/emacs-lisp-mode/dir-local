@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: .dir-locals
+# key: dir
+# --
+((python-mode .
+    ((pyvenv-activate . "~/$0/.venv")
+          (python-shell-interpreter . "python")
+          (blacken-mode . t)
+          (lsp-enabled . t))))

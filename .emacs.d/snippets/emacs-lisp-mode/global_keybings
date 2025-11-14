@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: global_keybings
+# key: global_keybings
+# --
+(global-set-key (kbd "$1") '$2)

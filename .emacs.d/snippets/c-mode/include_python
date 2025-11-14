@@ -1,0 +1,36 @@
+# -*- mode: snippet -*-
+# name: include <Python.h>
+# key: include Python
+# --
+#include <stdio.h>
+#include <python3.12/Python.h>
+
+PyObject *$0(PyObject *self, PyObject *args){
+    double x;
+    double y;
+    PyArg_ParseTuple(args, "dd", &x, &y);
+    return PyFloat_FromDouble(x +y);
+}
+
+
+static PyMethodDef methods[] = {
+    {"$0", $0, METH_VARARGS, "Add 2 ints"},
+    {NULL, NULL, 0, NULL}
+};
+
+
+/* MODULE INIT HERE !!!*/
+static struct PyModuleDef c_add = {
+    PyModuleDef_HEAD_INIT,
+    "c_$0",   /* name of module, __name__ */
+    "Doing something in C",       /* module documentation, , __doc__ */
+    -1,         /* size of per-interpreter state of the module,
+                   or -1 if the module keeps state in global variables. */
+    methods
+};
+
+/* On Import will print Imported !!!*/
+PyMODINIT_FUNC PyInit_c_$0(){
+    printf("Imported $0\n");
+    return PyModule_Create(&c_$0);
+}
