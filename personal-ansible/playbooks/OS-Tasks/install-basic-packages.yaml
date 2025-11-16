@@ -1,0 +1,42 @@
+---
+# Referenced from
+# https://github.com/lujun9972/dotfile/blob/master/arch-ansible/roles/system/tasks/install_basic_packages.yml
+
+- name: 安装必要软件 For Arch Desktop
+  when: ansible_facts['os_family'] == 'Arch'
+  pacman: "name={{item}} state=latest"
+  with_items:
+    - sudo
+    - git
+    - openssh
+    - pandoc
+    - emacs
+    - unrar
+    - bash-completion
+    - dmenu
+    - gcc
+    - clang
+    - clangd
+    - mailutils
+    - vim
+    - unzip
+    - zip
+    # - shadowsocks
+    # - alsa-utils
+    # - pulseaudio-alsa
+    # - smplayer
+    # - mpg123
+    # - cmake
+    # - rofi
+    # - yaourt
+    # - fcitx-im
+    # - fcitx-configtool
+    # - fcitx-sunpinyin
+    # - fcitx-googlepinyin
+    # - jdk8-openjdk
+    # - udisks2
+    # - udiskie
+    # - ntfs-3g
+    # - intel-ucode
+    # - aspell
+    # - aspell-en

@@ -1,0 +1,35 @@
+---
+# Referenced from
+# https://github.com/lujun9972/dotfile/blob/master/arch-ansible/roles/system/tasks/install_gui_packages.yml
+
+---
+- name: 安装图形环境
+  when: ansible_facts['os_family'] == 'Arch'
+  pacman: "name={{item}} state=latest"
+  with_items:
+    - xorg
+    - xorg-xinit
+    - xterm
+    - zathura
+    - zathura-pdf-mupdf
+    - xscreensaver
+    - firefox
+    # - rxvt-unicode
+    # - urxvt-perls
+    # - xcompmgr
+    # - redshift
+    # - ttf-dejavu
+    # - adobe-source-code-pro-fonts
+    # - terminus-font
+    # - wqy-zenhei
+    # - wqy-microhei
+    # - awesome
+    # - archlinux-xdg-menu
+    # - shadowsocks-qt5
+    # - zeal
+    # - flashplugin
+    # - mplayer
+    # - smplayer
+    # - scrot
+    # - anki
+    # - nemo
