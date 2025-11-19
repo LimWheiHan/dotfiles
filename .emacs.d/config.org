@@ -233,20 +233,25 @@ Can explore code syntax tree
 M-x `treesit-explre-mode`, `treesit-inspect-mode`
 #+begin_src emacs-lisp
 ;; TreeSitter
-;; (use-package treesit-auto
-;;   :config
-;;   (treesit-auto-add-to-auto-mode-alist 'all))
+(use-package treesit-auto
+  :ensure t
+  :config
 
+  ;; (treesit-auto-install-all)
+  (global-tree-sitter-mode)
+  (treesit-auto-add-to-auto-mode-alist 'all))
+
+(setq treesit-font-lock-level 4)
 ;; Remap Langs Major Mode to their TS version
-;; (setq major-mode-remap-alist
-;;       '((yaml-mode . yaml-ts-mode)
-;; 	(bash-mode . bash-ts-mode)
-;; 	(js2-mode . js-ts-mode)
-;; 	(json-mode . json-ts-mode)
-;; 	(css-mode . css-ts-mode)
-;; 	(c-mode . c-ts-mode)
-;; 	(c++-mode . c++-ts-mode)
-;; 	(python-mode . python-ts-mode)))
+(setq major-mode-remap-alist
+      '((yaml-mode . yaml-ts-mode)
+	(bash-mode . bash-ts-mode)
+	(js2-mode . js-ts-mode)
+	(json-mode . json-ts-mode)
+	(css-mode . css-ts-mode)
+	(c-mode . c-ts-mode)
+	(c++-mode . c++-ts-mode)
+	(python-mode . python-ts-mode)))
 
 
 
@@ -840,6 +845,8 @@ can install lsp from emacs *M-x lsp-install-server*
 #+end_src
 ** Auto Complete
 *** Corfu
+Completion in Region Function
+
 #+begin_src emacs-lisp
 (use-package corfu
   ;; Optional customizations
@@ -851,7 +858,7 @@ can install lsp from emacs *M-x lsp-install-server*
   (corfu-preselect 'prompt)      ;; Preselect the prompt
   (corfu-on-exact-match nil)     ;; Configure handling of exact matches
   (corfu-popupinfo-mode t)
-  (corfu-echo-documentation nil)        ; Already use corfu-popupinfo
+  (corfu-echo-documentation t)        ; Already use corfu-popupinfo
   ;; Enable Corfu only for certain modes. See also `global-corfu-modes'.
   ;; :hook ((prog-mode . corfu-mode)
   ;;        (shell-mode . corfu-mode)
@@ -869,9 +876,10 @@ can install lsp from emacs *M-x lsp-install-server*
   ;; Recommended: Enable Corfu globally.  Recommended since many modes provide
   ;; Capfs and Dabbrev can be used globally (M-/).  See also the customization
   ;; variable `global-corfu-modes' to exclude certain modes.
-  (global-corfu-mode -1)
+  (global-corfu-mode)
   ;; Enable optional extension modes:
   (corfu-history-mode)
+  (corfu-popupinfo-mode)
   :config
   ;; use tab to auto-complete instead of C-M-i
   (setq tab-always-indent 'complete)
@@ -883,23 +891,51 @@ can install lsp from emacs *M-x lsp-install-server*
                               (setq-local corfu-auto nil)
                               (corfu-mode)))
 #+end_src
-*** COMMENT Cape
+*** Dabbrev 
+
 #+begin_src emacs-lisp
-(use-package cape
-  :ensure t
-  :bind ("M-/" . dabbrev-expand)
-  :init
+;; (use-package cape
+(use-package dabbrev
+  ;; :ensure t
+  ;; :bind ("M-/" . dabbrev-expand)
+  :bind (("M-/" . dabbrev-completion)
+         ("C-M-/" . dabbrev-expand))
+  :config 
+  ;; (add-to-list 'dabbrev-ignored-buffer-regexps "\\` ")
   (add-to-list 'dabbrev-ignored-buffer-modes 'authinfo-mode)
   (add-to-list 'dabbrev-ignored-buffer-modes 'doc-view-mode)
   (add-to-list 'dabbrev-ignored-buffer-modes 'pdf-view-mode)
-  (add-to-list 'dabbrev-ignored-buffer-modes 'tags-table-mode)
-  (add-to-list 'completion-at-point-functions 
-	       #'cape-file
-	       #'cape-abbrev
-	       #'cape-dabbrev))
+  (add-to-list 'dabbrev-ignored-buffer-modes 'tags-table-mode))
 #+end_src
 
-**** elisp-mode-cape
+*** Cape
+#+begin_src emacs-lisp
+;; Add extensions
+(use-package cape
+  ;; Bind prefix keymap providing all Cape commands under a mnemonic key.
+  ;; Press C-c p ? to for help.
+  ;; :bind ("C-c p" . cape-prefix-map) ;; Alternative key: M-<tab>, M-p, M-+
+  :bind ("M-p" . cape-prefix-map) ;; Alternative key: M-<tab>, M-p, M-+
+  ;; Alternatively bind Cape commands individually.
+  ;; :bind (("C-c p d" . cape-dabbrev)
+  ;;        ("C-c p h" . cape-history)
+  ;;        ("C-c p f" . cape-file)
+  ;;        ...)
+  :init
+  ;; Add to the global default value of `completion-at-point-functions' which is
+  ;; used by `completion-at-point'.  The order of the functions matters, the
+  ;; first function returning a result wins.  Note that the list of buffer-local
+  ;; completion functions takes precedence over the global list.
+  (add-hook 'completion-at-point-functions #'cape-dabbrev)
+  (add-hook 'completion-at-point-functions #'cape-file)
+  (add-hook 'completion-at-point-functions #'cape-elisp-block)
+  ;; (add-to-list 'completion-at-point-functions  #'cape-file #'cape-abbrev #'cape-dabbrev)
+  ;; (add-hook 'completion-at-point-functions #'cape-history)
+  ;; ...
+)
+#+end_src
+
+*** COMMENT elisp-mode-cape
 #+begin_src emacs-lisp
 (use-package elisp-mode-cape
   :no-require t
@@ -914,6 +950,18 @@ can install lsp from emacs *M-x lsp-install-server*
                   cape-file)
                 cape-dabbrev-min-length 2)))
 #+end_src
+
+*** Eglot with Corfu
+#+begin_src emacs-lisp
+;; Option 1: Specify explicitly to use Orderless for Eglot
+(setq completion-category-overrides '((eglot (styles orderless))
+                                      (eglot-capf (styles orderless))))
+
+;; Enable cache busting, depending on if your server returns
+;; sufficiently many candidates in the first place.
+(advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
+#+end_src
+
 *** Company
 Better AutoComplete using Company with LSP-Mode.  eglot (the built-in LSP but less mature&outdated)
 #+begin_src emacs-lisp
@@ -1399,6 +1447,7 @@ Show Diagrams using Mermaid
    (latex . t)
    ))
 
+(setq org-babel-python-command "/usr/bin/python3")
 
 ;; Don't ask for every code block to execute
 (setq org-confirm-babel-evaluate nil)
@@ -1410,6 +1459,19 @@ Show Diagrams using Mermaid
   (define-key org-mode-map (kbd "C-S-<return>") #'org-insert-item))
 #+end_src
 
+
+** corg 
+Completion for org source block headers
+
+C-M-i : to trigger auto-complete
+#+begin_src emacs-lisp
+(use-package corg
+  :vc (:url "https://github.com/isamert/corg.el")
+  ;; :hook (org-mode . corg-setup)
+)
+
+(add-hook 'org-mode-hook #'corg-setup)
+#+end_src
 
 ** Org-Mode Babel Async
 Enables several async code blocks, may interfere with blocks that define the :async
@@ -1768,7 +1830,7 @@ Verb CMD  C-s (verb-send-request-on-point-other-window: send req in other window
 ;;   (define-key org-mode-map (kbd "C-c C-r") verb-command-map))
 
 ;; Verb Cmds
-;; C-r : send req in new buffer
+;; C-r : send req in new buffer ; send-res-to-other-window-stay
 ;; C-e : send req in new buffer
 
 ;; (use-package org
@@ -1792,6 +1854,49 @@ Show the undo tree
   :bind (("C-c C-/" . vundo)))
 #+end_src
 *** Man / Woman (For Windows) Pages
+
+*** COMMENT Swagger/OpenAPI Client
+Still experimenting
+
+https://github.com/isamert/swagg.el
+#+begin_src emacs-lisp
+(use-package swagg
+  :ensure t
+  :vc (:url "https://github.com/isamert/swagg.el")
+  ;; :hook (org-mode . corg-setup)
+)
+
+(setq
+ swagg-definitions
+ '((:name "GitHub"
+    :json "https://raw.githubusercontent.com/github/rest-api-description/main/descriptions/api.github.com/api.github.com.json"
+    :base "https://api.github.com"
+    :header-all ((token . "12345")
+                 (Cache-Control . "no-cache")
+                 (Content-Type . "application/json")
+                 (Accept . "application/json")
+                 (another-header . "value")))
+   ;; (:name "GitLab"
+   ;;  :yaml "https://gitlab.com/gitlab-org/gitlab/-/raw/master/doc/api/openapi/openapi.yaml"
+   ;;  :base "https://gitlab.com/api"
+   ;;  :header ((token . "12345")
+   ;;           (Cache-Control . "no-cache")
+   ;;           (Content-Type . "application/json")
+   ;;           (Accept . "application/json")
+   ;;           (another-header . "value")))
+   (:name "py-service-engine"
+    ;;:yaml "https://gitlab.com/gitlab-org/gitlab/-/raw/master/doc/api/openapi/openapi.yaml"
+    :json "http://localhost:8004/openapi.json"
+    :base "http://localhost:8004/"
+    :header ((Content-Type . "application/json")
+             (Cache-Control . "no-cache")
+             (Accept . "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+             (Accept-Encoding . "gzip, deflate, br, zstd")
+             (another-header . "value"))
+    )
+))
+
+#+end_src
 
 * UNIX Utils
 *M-x*:
