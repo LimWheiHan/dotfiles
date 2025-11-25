@@ -1963,3 +1963,36 @@ Clearning up modeline by diminishing minor modes
 ;; (setq display-time-24hr-format t)
 ;; (setq display-time-format "%H:%M")
 #+end_src
+
+* Header Line
+
+** Org-Mode Header Breadcrumbs
+
+ref: https://emacs.stackexchange.com/questions/61101/keep-displaying-current-org-heading-info-in-some-way
+
+#+begin_src emacs-lisp
+(defun my/heading-title ()
+   "Get the heading title."
+   (save-excursion
+     (if (not (org-at-heading-p))
+       (org-previous-visible-heading 1))
+     (org-element-property :title (org-element-at-point))))
+
+(defun my/org-breadcrumbs ()
+   "Get the chain of headings from the top level down
+    to the current heading."
+   (let ((breadcrumbs (org-format-outline-path
+                         (org-get-outline-path)
+                         (1- (frame-width))
+                         nil "->"))
+         (title (my/heading-title)))
+     (if (string-empty-p breadcrumbs)
+         title
+       (format "%s->%s" breadcrumbs title))))
+
+(defun my/set-header-line-format()
+  ;; display something in the header-line
+  (setq header-line-format '(:eval (my/org-breadcrumbs))))
+
+(add-hook 'org-mode-hook #'my/set-header-line-format)
+#+end_src
