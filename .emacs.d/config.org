@@ -677,6 +677,11 @@ This package provides marginalia-mode which adds marginalia to the minibuffer co
   (global-hl-line-mode t)		; global highlight line mode 
   ;; (global-prettify-symbols-mode t) 	; for icons like lambda & nill
   )
+
+;; Make 4 SPC indent the default
+(setq-default indent-tabs-mode nil)     ; replace instead of tabs for indent
+(setq-default tab-width 4)
+(setq indent-line-function 'insert-tab)
 #+end_src
 ** Wrap-Region Mode
 ref: github.com/rejeep/wrap-region.el
@@ -1260,6 +1265,33 @@ need to decide on using clangd or ccls
 ;; (use-package rust-mode
 ;;   :hook (rust-mode . lsp))
 #+end_src
+*** Julia
+#+begin_src emacs-lisp
+(use-package julia-mode
+  :ensure t)
+
+(use-package julia-ts-mode
+  :ensure t
+  :mode "\\.jl$")
+
+(use-package julia-vterm
+  :defer t
+  :init
+  ;; Limit Julia to use only 4 Threads
+  (setq julia-vterm-repl-program "~/.cargo/bin/julia -t 4")
+  ;; (add-hook 'julia-mode-hook #'julia-vterm-mode)
+  ;; equivalent shortform
+  :hook (julia-mode . julia-vterm-mode))
+
+;; ob-julia-vterm
+;; Prereq: julia-vterm
+(use-package ob-julia-vterm
+  :after org)
+
+(use-package eglot-jl)
+;; after installation M-x `eglot-jl-init`
+;; will load support, but will take a while to compile
+#+end_src
 ** Minimap
 show & navigate whole buffer
 ref: https://github.com/emacsmirror/demap
@@ -1425,11 +1457,14 @@ Show Diagrams using Mermaid
 
  )
 
-;; Enable Shift Highlight in Org Mode
-(setq org-support-shift-select t)
+;; Disable Shift Highlight in Org Mode
+(setq org-support-shift-select nil)
+;; When editing source block mode, use language indentation
+(setq org-src-preserve-indentation t)
 
 (require 'ob-C)
 (require 'ob-duckdb)
+(require 'ob-makefile)
 
 ;; Active Babel Language Executions in Org Mode
 (org-babel-do-load-languages
@@ -1440,14 +1475,21 @@ Show Diagrams using Mermaid
    (duckdb . t)		     ;; replacing dsq
    (dot . t)                     ;; for DOT graphs
    (gnuplot . t)
+   (makefile . t)                ;; just for syntax highlight, cannot babel run, need tangle 
+                                 ;; then run from the tangle file if want test it
    (shell . t)                   ;; enable a shell, regardless bash, fish etc...
    (C . t)
    (python . t)
    (js . t)
    (latex . t)
+   (julia-vterm . t)
    ))
 
 (setq org-babel-python-command "/usr/bin/python3")
+
+;; Use `julia` as the source block name instead of julia-vterm
+(defalias 'org-babel-execute:julia 'org-babel-execute:julia-vterm)
+(defalias 'org-babel-variable-assignments:julia 'org-babel-variable-assignments:julia-vterm)
 
 ;; Don't ask for every code block to execute
 (setq org-confirm-babel-evaluate nil)

@@ -43,3 +43,22 @@ export MANPAGER='vim -M +MANPAGER "+set nonumber" -'
 
 export GUIX_PROFILE="$HOME/.config/guix/current"
 export GUIX_LOCPATH="$HOME/.guix-profile/lib/locale"
+
+export NVM_DIR="$HOME/.config/nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# >>> juliaup initialize >>>
+
+# !! Contents within this block are managed by juliaup !!
+
+case ":$PATH:" in
+    *:/home/wheih/.juliaup/bin:*)
+        ;;
+
+    *)
+        export PATH=/home/wheih/.juliaup/bin${PATH:+:${PATH}}
+        ;;
+esac
+
+# <<< juliaup initialize <<<
