@@ -1830,6 +1830,14 @@ tldr
 (global-set-key (kbd "C-v") 'browse-kill-ring)
 
 #+end_src
+
+*** Clear Kill Ring
+#+begin_src emacs-lisp
+(defun my/clear-kill-ring ()   
+  "Clear the results on the kill ring."
+  (interactive)
+  (setq kill-ring nil))
+#+end_src
 *** Browse Web Browser
 
 #+begin_src emacs-lisp
@@ -2011,7 +2019,7 @@ Clearning up modeline by diminishing minor modes
 ** Org-Mode Header Breadcrumbs
 
 ref: https://emacs.stackexchange.com/questions/61101/keep-displaying-current-org-heading-info-in-some-way
-
+*** COMMENT self defined
 #+begin_src emacs-lisp
 (defun my/heading-title ()
    "Get the heading title."
@@ -2026,7 +2034,7 @@ ref: https://emacs.stackexchange.com/questions/61101/keep-displaying-current-org
    (let ((breadcrumbs (org-format-outline-path
                          (org-get-outline-path)
                          (1- (frame-width))
-                         nil "->"))
+                         nil ">"))
          (title (my/heading-title)))
      (if (string-empty-p breadcrumbs)
          title
@@ -2037,4 +2045,178 @@ ref: https://emacs.stackexchange.com/questions/61101/keep-displaying-current-org
   (setq header-line-format '(:eval (my/org-breadcrumbs))))
 
 (add-hook 'org-mode-hook #'my/set-header-line-format)
+#+end_src
+*** breadcrumb package
+#+begin_src emacs-lisp
+(use-package breadcrumb
+  :ensure t
+  :hook (find-file-hook . breadcrumb-local-mode)
+  :config
+  (setq breadcrumb-imenu-max-length 1.0)
+  (setq breadcrumb-project-max-length 1.0)
+
+  ;; Make Org heading style the same.
+  ;; https://github.com/joaotavora/breadcrumb/issues/35
+  (defun breadcrumb-org-crumbs ()
+    "Get the chain from the top level heading down to current heading."
+    (unless (org-before-first-heading-p)
+      (org-format-outline-path (org-get-outline-path t)
+                               (1- (frame-width)) ; width
+                               nil                ; prefix
+                               "->")))           ; separator
+
+  (define-advice breadcrumb--header-line
+    (:override (&rest args) support-org-mode)
+    "Helper for `breadcrumb-headerline-mode'."
+    (let* ((imenu-crumbs (if (derived-mode-p 'org-mode)
+                             'breadcrumb-org-crumbs
+                           'breadcrumb-imenu-crumbs))
+           (x (cl-remove-if
+               #'seq-empty-p (mapcar #'funcall
+                                     `(breadcrumb-project-crumbs ,imenu-crumbs)))))
+      (mapconcat #'identity x (propertize ": " 'face 'breadcrumb-face)))))
+#+end_src
+* Untested Utils
+** COMMENT LLMs
+ref: https://gitlab.com/vslavkin/emacs-config/-/blob/master/emacs.org
+
+#+begin_src emacs-lisp
+(use-package gptel
+  :commands (gptel gptel-menu)
+  :bind ("C-c g" . gptel-menu)
+  :custom
+  (gptel-default-mode 'org-mode)
+  :config
+  (gptel-make-ollama "Ollama"             ;Any name of your choosing
+    :host "localhost:11434"               ;Where it's running
+    :stream t                             ;Stream responses
+    :models '(deepseek-r1:14b qwen2.5:latest gemma2:latest phi4:latest)) ;List of models
+
+  (gptel-make-gemini "Gemini"
+    :key gemini-key
+    :stream t
+    :request-params '(:tools [(:google_search ())]))
+  )
+#+end_src
+** COMMENT exec path from shell
+load environ variables into shells
+#+begin_src emacs-lisp
+
+;; (require 'exec-path-from-shell) ;; if not using the ELPA package
+(use-package exec-path-from-shell
+  :ensure t)
+(exec-path-from-shell-initialize)
+#+end_src
+** COMMENT Python-ts-mode fonts
+ref: https://amitp.blogspot.com/2025/02/emacs-tree-sitter-custom-highlighting.html
+#+begin_src emacs-lisp
+(treesit-font-lock-rules
+ :language 'python
+ :feature 'definition
+ :override t
+ '(
+   ((import_statement name: (dotted_name (identifier) @font-lock-variable-name-face)))
+   ((import_from_statement module_name: (dotted_name (identifier))
+                           name: (dotted_name (identifier) @font-lock-variable-name-face)))
+   ))
+
+(defvar amitp/python-treesit-settings
+  (treesit-font-lock-rules
+   :language 'python
+   :feature 'keyword :override t
+   '(
+     (["assert" "await" "break" "continue" "finally" "raise" "return" "yield"] @amitp-control-keyword-face)
+     (["type"] @font-lock-keyword-face)
+    )))
+
+(add-hook 'python-ts-mode-hook
+          (lambda ()
+            (setq-local treesit-font-lock-settings
+                        (append treesit-font-lock-settings amitp/python-treesit-settings))))
+
+(defface my-control-keyword-face)
+(defvar my/python-treesit-settings
+  ;; (treesit-font-lock-rules
+  ;;  :language 'python
+  ;;  :feature 'keyword
+  ;;  :override t
+  ;;  '(
+  ;;    (["assert" "await" "break" "continue" "finally" "raise" "return" "yield"]
+  ;;     @my-control-keyword-face)
+  ;;    (["type"] @font-lock-keyword-face)
+  ;;    )
+  ;;  )
+  (treesit-font-lock-rules
+   :language 'python
+   :feature 'definition
+   :override t
+   '(
+     ((import_statement name: (dotted_name (identifier) @font-lock-variable-name-face)))
+     ((import_from_statement module_name: (dotted_name (identifier))
+                             name: (dotted_name (identifier) @font-lock-variable-name-face)))
+     ))
+
+)
+
+(add-hook 'python-ts-mode-hook
+          (lambda ()
+            (setq-local treesit-font-lock-settings
+                        (append treesit-font-lock-settings
+                                my/python-treesit-settings))))
+
+(add-hook 'python-mode-hook
+  (lambda ()
+    (add-function :before-until (local 'tree-sitter-hl-face-mapping-function)
+      (lambda (capture-name)
+	(pcase capture-name
+	  ("doc" 'font-lock-comment-face))))))
+#+end_src
+** javascript-ts-mode fonts
+#+begin_src emacs-lisp
+(treesit-font-lock-rules
+ :language 'javascript
+ :feature 'constant
+ :override t
+ '((true) @font-lock-constant-face
+   (false) @font-lock-constant-face)
+ :language 'html
+ :feature 'script
+ "(script_element) @font-lock-builtin-face")
+#+end_src
+** COMMENT trees-sitter doc
+#+begin_src emacs-lisp
+(require 'tree-sitter)
+(require 'tree-sitter-hl)
+(require 'tree-sitter-langs)
+(require 'tree-sitter-debug)
+(require 'tree-sitter-query)
+
+(global-tree-sitter-mode)
+(add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)
+;; (tree-sitter-require 'rust)
+(tree-sitter-require 'python)
+;; Rust
+(function_item (identifier) @func)
+(impl_item (type_identifier) @impl)
+
+;; Python
+(class_definition (identifier) @class)
+(function_definition (identifier) @func)
+
+;; Javascript
+(function_declaration (identifier) @func)
+(variable_declarator (identifier) @var)
+
+;; (mapc #'treesit-install-language-grammar (mapcar #'car treesit-language-source-alist))
+(treesit-language-available-p 'python)	;Check treesitter for language available
+(treesit-language-available-p 'c)	;Check treesitter for language available
+(treesit-language-available-p 'c++)	;Check treesitter for language available
+(setq major-mode-remap-alist
+ '((yaml-mode . yaml-ts-mode)
+   (bash-mode . bash-ts-mode)
+   (js2-mode . js-ts-mode)
+   (typescript-mode . typescript-ts-mode)
+   (json-mode . json-ts-mode)
+   (css-mode . css-ts-mode)
+   (python-mode . python-ts-mode)))
 #+end_src
