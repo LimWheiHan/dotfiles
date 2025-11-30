@@ -1663,29 +1663,6 @@ Not maintained anymore, should look into DuckDB
 
 #+end_src
 
-* Untested Utils
-** COMMENT LLMs
-ref: https://gitlab.com/vslavkin/emacs-config/-/blob/master/emacs.org
-
-#+begin_src emacs-lisp
-(use-package gptel
-  :commands (gptel gptel-menu)
-  :bind ("C-c g" . gptel-menu)
-  :custom
-  (gptel-default-mode 'org-mode)
-  :config
-  (gptel-make-ollama "Ollama"             ;Any name of your choosing
-    :host "localhost:11434"               ;Where it's running
-    :stream t                             ;Stream responses
-    :models '(deepseek-r1:14b qwen2.5:latest gemma2:latest phi4:latest)) ;List of models
-
-  (gptel-make-gemini "Gemini"
-    :key gemini-key
-    :stream t
-    :request-params '(:tools [(:google_search ())]))
-  )
-#+end_src
-
 * Custom Utils
 ** Org to Word Docx Export
 need pandoc & ox-pandoc
