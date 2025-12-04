@@ -230,66 +230,6 @@ Flycheck is the more modern, but flymake is built-in
 ** Tree-Sitter
 Can explore code syntax tree
 
-M-x `treesit-explre-mode`, `treesit-inspect-mode`
-#+begin_src emacs-lisp
-;; TreeSitter
-(use-package treesit-auto
-  :ensure t
-  :config
-
-  ;; (treesit-auto-install-all)
-  (global-tree-sitter-mode)
-  (treesit-auto-add-to-auto-mode-alist 'all))
-
-(setq treesit-font-lock-level 4)
-;; Remap Langs Major Mode to their TS version
-(setq major-mode-remap-alist
-      '((yaml-mode . yaml-ts-mode)
-	(bash-mode . bash-ts-mode)
-	(js2-mode . js-ts-mode)
-	(json-mode . json-ts-mode)
-	(css-mode . css-ts-mode)
-	(c-mode . c-ts-mode)
-	(c++-mode . c++-ts-mode)
-	(python-mode . python-ts-mode)))
-
-
-
-;; (use-package tree-sitter-langs
-;;   :ensure t)
-
-;; Syntax Highlighting not working
-;; (global-tree-sitter-mode)
-;; (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)
-
-;; (add-hook 'python-ts-mode-hook
-;;           (lambda ()
-;;             (setq-local treesit-font-lock-settings
-;;                         (append treesit-font-lock-settings
-;;                                 '((:language 'python
-;;                                              :feature 'keyword
-;;                                              :override t
-;;                                              '((["type"] @font-lock-keyword-face))))))))
-
-
-;; (require 'treesit)
-;; (defface fa-ts-string-face
-;;   '((t (:inherit font-lock-string-face :bold t :underline t)))
-;;   "Underlined string face.")
-
-;; (defvar fa/ts-font-lock-settings
-;;   (treesit-font-lock-rules
-;;    :language 'c
-;;    :feature 'literal
-;;    :override t
-;;    '((string_literal) @fa-ts-string-face)))
-
-;; (add-hook 'c-ts-mode-hook
-;;           (lambda () (setq-local treesit-font-lock-settings
-;; 				 (append treesit-font-lock-settings
-;; 					 fa/ts-font-lock-settings))))
-#+end_src
-
 *** Treesitter Grammars Source
 
 #+begin_src emacs-lisp
@@ -304,12 +244,74 @@ M-x `treesit-explre-mode`, `treesit-inspect-mode`
      (json "https://github.com/tree-sitter/tree-sitter-json")
      (make "https://github.com/alemuller/tree-sitter-make")
      (markdown "https://github.com/ikatyang/tree-sitter-markdown")
-     (python "https://github.com/tree-sitter/tree-sitter-python")
+     ;; (python . ("https://github.com/tree-sitter/tree-sitter-python" "v0.23.6" nil nil nil))
+     (python . ("https://github.com/tree-sitter/tree-sitter-python" "v0.23.6" "src"))
+     ;; (python "https://github.com/tree-sitter/tree-sitter-python")
      (toml "https://github.com/tree-sitter/tree-sitter-toml")
      (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
      (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
      (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
 #+end_src
+*** Syntax Highlighting
+M-x `treesit-explre-mode`, `treesit-inspect-mode`
+#+begin_src emacs-lisp
+;; TreeSitter
+(use-package tree-sitter
+  :ensure nil
+  :when (treesit-available-p)
+  :init
+  (setq treesit-font-lock-level 4)
+  ;; Remap Langs Major Mode to their TS version
+  (setq major-mode-remap-alist
+        '((yaml-mode . yaml-ts-mode)
+	      (bash-mode . bash-ts-mode)
+	      (js2-mode . js-ts-mode)
+	      (json-mode . json-ts-mode)
+	      (css-mode . css-ts-mode)
+	      (c-mode . c-ts-mode)
+	      (c++-mode . c++-ts-mode)
+	      (python-mode . python-ts-mode))))
+
+;; ref: https://www.reddit.com/r/emacs/comments/151fplj/how_to_correctly_enable_treesitterhlmode_with/
+(use-package tree-sitter-langs
+  :after tree-sitter
+  :config
+  ;; Shorted list creation macro doesn't work without the `setq`???
+  (setq major-mode-remap-alist
+        '((yaml-mode . yaml-ts-mode)
+          (bash-mode . bash-ts-mode)
+          (js2-mode . js-ts-mode)
+          (json-mode . json-ts-mode)
+          (css-mode . css-ts-mode)
+          (c-mode . c-ts-mode)
+          (c++-mode . c++-ts-mode)
+          (python-mode . python-ts-mode)))
+  ;; (add-to-list 'major-mode-remap-alist '(c-mode . c-ts-mode))
+  ;; (add-to-list 'major-mode-remap-alist '(c++-mode . c++-ts-mode))
+
+  (setq tree-sitter-major-mode-language-alist 
+               '((c++-ts-mode . cpp)
+               (c-ts-mode . c)
+               (yaml-ts-mode . yaml)
+               (python-ts-mode . python)))
+  ;; (add-to-list 'tree-sitter-major-mode-language-alist '(c++-ts-mode . cpp))
+  ;; (add-to-list 'tree-sitter-major-mode-language-alist '(c-ts-mode . c))
+  )
+
+(use-package treesit-auto
+  :after tree-sitter
+  :config
+  ;; (treesit-auto-install-all)
+  ;; (global-tree-sitter-mode)
+  (treesit-auto-add-to-auto-mode-alist 'all))
+
+
+;; Syntax Highlighting not working
+;; (global-tree-sitter-mode)
+(add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)
+;; (add-hook 'python-mode-hook #'tree-sitter-hl-mode)
+#+end_src
+
 ** Project Mode
 #+begin_src emacs-lisp
   ;; Projectile Mode (Not working?)
