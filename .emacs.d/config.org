@@ -1824,6 +1824,21 @@ tldr
   "Clear the results on the kill ring."
   (interactive)
   (setq kill-ring nil))
+
+(defun my/mark-line (&optional arg)
+  "Mark the current line, or ARG lines."
+  (interactive "P")
+  (if (null arg)
+      (progn
+        (set-mark (line-beginning-position))
+        (forward-line 1))
+    ;; With argument, mark ARG lines
+    (let ((count (prefix-numeric-value arg)))
+      (set-mark (line-beginning-position))
+      (forward-line count))))
+(global-set-key (kbd "C-l") 'my/mark-line)
+;; Overrides recenter-top-bottom
+
 #+end_src
 *** Browse Web Browser
 
