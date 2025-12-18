@@ -41,6 +41,7 @@ In Global Environment
 - autopep8: format code to PEP 8 style
   (can maybe switch to *black* or *ruff*)
 - virtualenv / uv
+  - use pyvenv, trigger with pyvenv-activate: args with the venv dir
 #+begin_src sh
   # pip install jedi flake8 autopep8
 #+end_src
@@ -384,14 +385,18 @@ ref: github.com/doomemacs/doomemacs/issues/3108
 (tool-bar-mode 0)
 (menu-bar-mode 0)
 (scroll-bar-mode 0)
-(whitespace-mode 0)
+(whitespace-mode 0)  ;; disable by default
+(setq whitespace-line-column 160) ;; Set the limit for long lines
+;; Make sure 'lines' or 'lines-tail' is included in whitespace-style for this to work
+(setq whitespace-style '(face tabs empty trailing lines-tail))
+
 (global-display-line-numbers-mode 0)
 ;;(global-display-line-numbers-mode 1)
 ;; Only Display Line Numbers in Programming Language Modes
 ;;(add-hook 'prog-mode '(lambda () (display-line-numbers t)))
 (add-hook 'prog-mode 'display-line-numbers-mode)
 ;; ref: https://emacs.stackexchange.com/questions/30221/wrap-lines-at-80-characters
-(setq-default fill-column 160)	 ; word line length increased from default 70
+(setq-default fill-column 160) ;; word line length increased from default 70
 ;; (setq display-line-numbers-type 'relative)
 (ido-mode t)
 (ido-everywhere t)
@@ -736,6 +741,10 @@ Like tiling manager? Need research
 #+end_src
 * Programming
 ** LSP-Servers
+*** General Settings
+#+begin_src emacs-lisp
+(add-hook 'prog-mode-hook #'display-line-numbers-mode)
+#+end_src
 *** COMMENT Eglot
 Try using eglot,since more minimal
 #+begin_src emacs-lisp
@@ -802,7 +811,6 @@ Try using eglot,since more minimal
 
 
 #+end_src
-
 *** COMMENT LSP-Mode
 use LSP-Mode, more mature than eglot?
 ref: https://systemcrafters.net/emacs-from-scratch/build-your-own-ide-with-lsp-mode/
@@ -1504,7 +1512,7 @@ Show Diagrams using Mermaid
 #+end_src
 
 
-** corg 
+** corg
 Completion for org source block headers
 
 C-M-i : to trigger auto-complete
